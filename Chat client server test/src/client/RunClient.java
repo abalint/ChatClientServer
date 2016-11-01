@@ -14,14 +14,22 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 import javax.swing.JScrollPane;
 import java.awt.Font;
 
 public class RunClient {
-	public static void main(String[] args)
+	 
+	public static void main(String[] args) throws IOException
 	{		
+	
+	    
 		LaunchWindow frame;
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -31,7 +39,8 @@ public class RunClient {
 		
 		frame = new LaunchWindow();
 		frame.setVisible(true);
-		JTextArea textBar = frame.getInputTextArea();;	
+		JTextArea textBar = frame.getInputTextArea();
+		JTextArea console = frame.getConsole();
 		boolean firstLoop = true;
 		long gameLaunchTime = Calendar.getInstance().getTimeInMillis();
 		long startLoopTime = Calendar.getInstance().getTimeInMillis();
@@ -43,8 +52,30 @@ public class RunClient {
 		int tickCount = 0;
 		
 		//player.addToConsoleOutput("welcome!");
-
-		while (true) { // keep running
+		BufferedReader in = null;
+	    PrintWriter out = null;
+		try{
+		String serverAddress = "localhost";
+        Socket socket = new Socket(serverAddress, 9001);
+        in = new BufferedReader(new InputStreamReader(
+            socket.getInputStream()));
+        out = new PrintWriter(socket.getOutputStream(), true);
+		}
+		catch(Exception e)
+		{
+			console.setText("Something broke while connecting");
+		}
+		
+		while (true) {
+            String line = in.readLine();
+            if (line.startsWith("SUBMITNAME")) {
+                console.setText("test");
+            } else if (line.startsWith("MESSAGE")) {
+                console.append(line.substring(8) + "\n");
+            }
+        }
+		
+	/*	while (true) { // keep running
 	    	startLoopTime = Calendar.getInstance().getTimeInMillis();
 	        long tickCheck = startLoopTime - updateLoopTime;
 	        long runTime = startLoopTime - gameLaunchTime;
@@ -61,13 +92,20 @@ public class RunClient {
 	        	//server check
 	        	if(enter.getEntered())
 	        	{
-	        		//run pressed enter code
+	        		pressedEnter(textBar, console, enter, out);
 	        	}
 	        	
 	        	firstLoop = false;
 	        	updateLoopTime = Calendar.getInstance().getTimeInMillis();
 	        }
-	    }
+	    }*/
+	}
+	
+	public static void pressedEnter(JTextArea textBar, JTextArea Console, Entered enter,PrintWriter out)
+	{
+		enter.setEntered(false);
+		Console.setText(Console.getText()+""+ textBar.getText());
+		textBar.setText("");
 	}
 	
 	public static void textBarListener (JTextArea textBar, Entered enter)
