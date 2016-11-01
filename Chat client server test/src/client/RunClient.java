@@ -41,21 +41,21 @@ public class RunClient {
 		frame.setVisible(true);
 		JTextArea textBar = frame.getInputTextArea();
 		JTextArea console = frame.getConsole();
-		boolean firstLoop = true;
-		long gameLaunchTime = Calendar.getInstance().getTimeInMillis();
-		long startLoopTime = Calendar.getInstance().getTimeInMillis();
-		long updateLoopTime = Calendar.getInstance().getTimeInMillis();
+		JTextArea board = frame.getBoard();
 		
 		Entered enter = new Entered();
 		enter.setEntered(false);
-		textBarListener(textBar, enter);
-		int tickCount = 0;
+	
 		
 		//player.addToConsoleOutput("welcome!");
+		
+		
+		
+		
 		BufferedReader in = null;
 	    PrintWriter out = null;
 		try{
-		String serverAddress = "localhost";
+		String serverAddress = "10.79.51.153";
         Socket socket = new Socket(serverAddress, 9001);
         in = new BufferedReader(new InputStreamReader(
             socket.getInputStream()));
@@ -66,16 +66,52 @@ public class RunClient {
 			console.setText("Something broke while connecting");
 		}
 		
-		while (true) {
-            String line = in.readLine();
-            if (line.startsWith("SUBMITNAME")) {
-                console.setText("test");
-            } else if (line.startsWith("MESSAGE")) {
-                console.append(line.substring(8) + "\n");
-            }
-        }
+//		while (true) {
+//			
+//            String line = in.readLine();
+//            if (line.startsWith("SUBMITNAME")) {
+//                console.setText("test");
+//            }
+//            else if (line.startsWith("NAMEACCEPTED")) {
+//                 console.setText(console.getText()+"Name Accepted");
+//            }
+//            else if (line.startsWith("MESSAGE")) {
+//                console.append(line.substring(8) + "\n");
+//            }
+//            if(enter.getEntered())
+//            	console.setText("true");
+//            else
+//            	console.setText("false");
+//            
+//            
+//            
+            
+//            
+//            
+//            if(enter.getEntered())
+//            {
+//            	console.setText("in entered");
+//            	//enter.setEntered(false);
+//        		//out.println(textBar.getText());
+//        		textBar.setText("");	
+//            }
+//	      	
+//	       
+//            
+//            
+//        }
 		
-	/*	while (true) { // keep running
+		
+		board.setText("Client start\n");
+		board.setText(board.getText()+"Connected to server\n");
+		long gameLaunchTime = Calendar.getInstance().getTimeInMillis();
+		long startLoopTime = Calendar.getInstance().getTimeInMillis();
+		long updateLoopTime = Calendar.getInstance().getTimeInMillis();
+		boolean firstLoop = true;
+		int tickCount = 0;
+		textBarListener(textBar, enter, out);
+		
+		while (true) { // keep running
 	    	startLoopTime = Calendar.getInstance().getTimeInMillis();
 	        long tickCheck = startLoopTime - updateLoopTime;
 	        long runTime = startLoopTime - gameLaunchTime;
@@ -89,26 +125,51 @@ public class RunClient {
 	        {
 	        	tickCount++;
 	        	
+	        	
+	        
+	        	
+	        	
 	        	//server check
 	        	if(enter.getEntered())
 	        	{
 	        		pressedEnter(textBar, console, enter, out);
 	        	}
 	        	
+	       
+	        	String line = in.readLine();      
+            if (line.startsWith("SUBMITNAME")) {
+                console.append("Submit your name\n");
+                }
+	            else if (line.startsWith("NAMEACCEPTED")) {
+	                 console.append("Name Accepted\n");
+	            }
+	            else if(line.startsWith("INVALIDNAME")){
+	            	console.append("Name alread in use, please select another.\n");
+	            }
+	            else if (line.startsWith("MESSAGE")) {
+	                board.append(line.substring(8) + "\n");
+	            }
+//	            if(enter.getEntered())
+//	            	console.setText("true");
+//	            else
+//	            	console.setText("false");
+	        
+	        	
+	        	
 	        	firstLoop = false;
 	        	updateLoopTime = Calendar.getInstance().getTimeInMillis();
 	        }
-	    }*/
+	    }
 	}
 	
-	public static void pressedEnter(JTextArea textBar, JTextArea Console, Entered enter,PrintWriter out)
+
+	public static void pressedEnter(JTextArea textBar,JTextArea console,Entered enter, PrintWriter out)
 	{
-		enter.setEntered(false);
-		Console.setText(Console.getText()+""+ textBar.getText());
+		//console.setText(console.getText()+""+textBar.getText());
 		textBar.setText("");
+		enter.setEntered(false);
 	}
-	
-	public static void textBarListener (JTextArea textBar, Entered enter)
+	public static void textBarListener (JTextArea textBar, Entered enter, PrintWriter out)
 	{
 		textBar.addKeyListener(new KeyListener(){
 		    @Override
@@ -116,7 +177,8 @@ public class RunClient {
 		    	switch (e.getKeyCode()){
 		        case KeyEvent.VK_ENTER:
 		        	enter.setEntered(true);
-
+		        	out.println(textBar.getText());
+		        	
 		        }
 		    }
 		    @Override
@@ -166,10 +228,13 @@ class LaunchWindow extends JFrame {
 		setContentPane(contentPane);
 		
 		JScrollPane boardPane = new JScrollPane();
+		boardPane.setAutoscrolls(true);
 		
 		JScrollPane consolePane = new JScrollPane();
+		consolePane.setAutoscrolls(true);
 		
 		inputPane = new JScrollPane();
+		inputPane.setAutoscrolls(true);
 		
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
